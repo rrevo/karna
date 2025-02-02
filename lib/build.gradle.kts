@@ -20,21 +20,14 @@ repositories {
 }
 
 dependencies {
-    // This dependency is exported to consumers, that is to say found on their compile classpath.
-    api(libs.commons.math3)
+    implementation(kotlin("reflect"))
 
-    // This dependency is used internally, and not exposed to consumers on their own compile classpath.
-    implementation(libs.guava)
+    testImplementation(kotlin("test"))
+    testImplementation("org.assertj:assertj-core:3.27.3")
 }
 
-testing {
-    suites {
-        // Configure the built-in test suite
-        val test by getting(JvmTestSuite::class) {
-            // Use Kotlin Test test framework
-            useKotlinTest("2.0.21")
-        }
-    }
+tasks.test {
+    useTestNG()
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
