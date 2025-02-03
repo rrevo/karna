@@ -4,6 +4,7 @@ import kotlinx.coroutines.runBlocking
 import org.testng.Assert
 import org.testng.annotations.DataProvider
 import org.testng.annotations.Test
+import java.io.Reader
 import java.io.StringReader
 import java.math.BigInteger
 
@@ -78,6 +79,75 @@ class StreamingCoroutineTest {
                     }
                     Assert.assertEquals(result, listOf(Person1("Joe", 23), Person1("Jill", 35)))
                 }
+            }
+        }
+    }
+
+    @Test(enabled = false)
+    fun streamingArrayAtScale() {
+        runBlocking {
+            val karna = Karna()
+            val MAX = 10_000_000
+            val PRINT_FACTOR = 10_000
+            val lazyReader = object: Reader() {
+                var started = false
+                var done = false
+                var count = 0
+                val objectData = """{ "name": "Joe", "age": 23 },""".toCharArray()
+                val objectDataSize = objectData.size
+
+                override fun read(cbuf: CharArray, off: Int, len: Int): Int {
+                    if (len == 0) {
+                        return 0
+                    }
+                    if (done) {
+                        return -1
+                    }
+                    if (!started) {
+                        started = true
+                        cbuf[off] = '['
+                        return 1
+                    }
+                    var currentOff = off
+                    var remainingLen = len
+                    while (count <= MAX && objectDataSize < remainingLen) {
+                        // NOTE Assume that a single object is smaller than the buffer size
+                        System.arraycopy(objectData, 0, cbuf, currentOff, objectDataSize)
+                        remainingLen -= objectDataSize
+                        currentOff += objectDataSize
+                        count++
+
+                        if (count == MAX) {
+                            // Replace the last comma with a closing bracket
+                            cbuf[currentOff - 1] = ']'
+                        }
+
+                    }
+                    if (count == MAX) {
+                        done = true
+                    }
+                    return len - remainingLen
+                }
+
+                override fun close() {
+                }
+            }
+
+            JsonCoroutineReader(lazyReader).use { reader ->
+                var counter = 0
+                val result = arrayListOf<Person1>()
+                reader.beginArray {
+                    while (reader.hasNext()) {
+                        val person = karna.parse<Person1>(reader)
+//                        result.add(person!!)
+                        counter++
+                        if (counter % PRINT_FACTOR == 0) {
+                            println("Remaining ${(MAX - counter) / PRINT_FACTOR} of ${MAX/PRINT_FACTOR} objects (* $PRINT_FACTOR)")
+                        }
+                    }
+                }
+                Assert.assertEquals(counter, MAX)
+                println("results size when leaking ${result.size}")
             }
         }
     }
