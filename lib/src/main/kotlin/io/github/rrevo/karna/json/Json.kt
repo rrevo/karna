@@ -1,7 +1,7 @@
 package io.github.rrevo.karna.json
 
 // While this is a valid JSON key name, it is unlikely to actually be used.
-const val NAME_NOT_INITIALIZED = "Klaxon:This field was not initialized!@#$%^&*()_+AIS8X9A4NT"
+const val NAME_NOT_INITIALIZED = "Karna:This field was not initialized!@#$%^&*()_+AIS8X9A4NT"
 
 // Commented VALUE_PARAMETER because of https://youtrack.jetbrains.com/issue/KT-23229
 @Target(AnnotationTarget.FIELD, AnnotationTarget.PROPERTY, AnnotationTarget.CONSTRUCTOR
@@ -15,7 +15,7 @@ annotation class Json(
     val name: String = NAME_NOT_INITIALIZED,
 
     /**
-     * If true, the property will be ignored by Klaxon.
+     * If true, the property will be ignored by Karna.
      */
     val ignored: Boolean = false,
 

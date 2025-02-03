@@ -87,7 +87,7 @@ class StreamingCoroutineTest {
     fun nestedObjects() {
         runBlocking {
             val objectString = """[
-            { "name": "Joe", "address": { "street": "Klaxon Road" }}
+            { "name": "Joe", "address": { "street": "Karna Road" }}
         ]""".trimIndent()
 
             val karna = Karna()
@@ -99,7 +99,7 @@ class StreamingCoroutineTest {
                         result.add(person!!)
                     }
                 }
-                Assert.assertEquals(result.get(0), Person2("Joe", Address("Klaxon Road")))
+                Assert.assertEquals(result.get(0), Person2("Joe", Address("Karna Road")))
             }
         }
     }

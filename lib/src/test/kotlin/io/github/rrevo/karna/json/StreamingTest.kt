@@ -79,7 +79,7 @@ class StreamingTest {
     data class Person2(val name: String, val address: Address)
     fun nestedObjects() {
         val objectString = """[
-            { "name": "Joe", "address": { "street": "Klaxon Road" }}
+            { "name": "Joe", "address": { "street": "Karna Road" }}
         ]""".trimIndent()
 
         val karna = Karna()
@@ -91,7 +91,7 @@ class StreamingTest {
                     result.add(person!!)
                 }
             }
-            Assert.assertEquals(result.get(0), Person2("Joe", Address("Klaxon Road")))
+            Assert.assertEquals(result.get(0), Person2("Joe", Address("Karna Road")))
         }
     }
 

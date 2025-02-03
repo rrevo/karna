@@ -18,7 +18,7 @@ import kotlin.reflect.jvm.javaType
 /**
  * Convert a JsonObject into a class instance.
  */
-class JsonObjectConverter(private val klaxon: Karna, private val allPaths: HashMap<String, Any>) {
+class JsonObjectConverter(private val karna: Karna, private val allPaths: HashMap<String, Any>) {
     /**
      * Go through all the constructors found on that object and attempt to invoke them with the key values
      * found on the object. We return the first successful instantiation, or fail with an exception if
@@ -40,7 +40,7 @@ class JsonObjectConverter(private val klaxon: Karna, private val allPaths: HashM
 
     private fun initIntoUserClass(jsonObject: JsonObject, kc: KClass<*>): Any {
         val typeFor = kc.findAnnotation<TypeFor>()
-        // kc is the desired class in output, but Klaxon might decide to produce a different class
+        // kc is the desired class in output, but Karna might decide to produce a different class
         // in certain conditions, such as a polymorphic class (with a @TypeFor annotation at the class level).
         val concreteClass = when {
             Annotations.isList(kc) -> {
@@ -49,7 +49,7 @@ class JsonObjectConverter(private val klaxon: Karna, private val allPaths: HashM
             typeFor != null -> {
                 val prop = kc.memberProperties.find { it.name == typeFor.field}
                         ?: illegalPropClass(typeFor.field, kc.simpleName!!)
-                val allProperties = Annotations.findNonIgnoredProperties(kc, klaxon.propertyStrategies)
+                val allProperties = Annotations.findNonIgnoredProperties(kc, karna.propertyStrategies)
 
                 val pi = createPolymorphicInfo(typeFor, prop, allProperties)
                 calculatePolymorphicClass(pi, kc, jsonObject) ?: throw KarnaException("Cant't find polymorphic class")
@@ -74,7 +74,7 @@ class JsonObjectConverter(private val klaxon: Karna, private val allPaths: HashM
 //                    parameterMap[parameter] = adjustType(convertedValue, parameter)
                     parameterMap[parameter] = convertedValue
                     val valueClass: Any = if (convertedValue != null) convertedValue::class else "null"
-                    klaxon.log("Parameter $parameter=$convertedValue ($valueClass)")
+                    karna.log("Parameter $parameter=$convertedValue ($valueClass)")
                 }
             }
             try {
@@ -117,7 +117,7 @@ class JsonObjectConverter(private val klaxon: Karna, private val allPaths: HashM
 
         // Now that we have an initialized object, find all the other non constructor properties
         // and if we have a value from JSON for them, initialize them as well. @@@
-        val properties = Annotations.findNonIgnoredProperties(kc, klaxon.propertyStrategies)
+        val properties = Annotations.findNonIgnoredProperties(kc, karna.propertyStrategies)
         properties.filter {
             it.name in map
         }.forEach {
@@ -134,7 +134,7 @@ class JsonObjectConverter(private val klaxon: Karna, private val allPaths: HashM
                     field.isAccessible = true
                     field.set(result, value)
                 } else {
-                    klaxon.log("Ignoring read-only property $it")
+                    karna.log("Ignoring read-only property $it")
                 }
             }
         }
@@ -174,7 +174,7 @@ class JsonObjectConverter(private val klaxon: Karna, private val allPaths: HashM
         val result = hashMapOf<String, Any?>()
 
         // Only keep the properties that are public and do not have @Json(ignored = true)
-        val allProperties = Annotations.findNonIgnoredProperties(kc, klaxon.propertyStrategies)
+        val allProperties = Annotations.findNonIgnoredProperties(kc, karna.propertyStrategies)
 
         // See if have any polymorphic properties
         val polymorphicMap = findPolymorphicProperties(allProperties)
@@ -184,7 +184,7 @@ class JsonObjectConverter(private val klaxon: Karna, private val allPaths: HashM
             // Check if the name of the field was overridden with a @Json annotation
             //
             val prop = kc.memberProperties.first { it.name == thisProp.name }
-            val fieldName = Annotations.retrieveJsonFieldName(klaxon, kc, prop)
+            val fieldName = Annotations.retrieveJsonFieldName(karna, kc, prop)
             val jsonAnnotation = Annotations.findJsonAnnotation(kc, prop.name)
             val path = if (jsonAnnotation?.path != "") jsonAnnotation?.path else null
 
@@ -203,13 +203,13 @@ class JsonObjectConverter(private val klaxon: Karna, private val allPaths: HashM
                     val kClass = polymorphicClass ?: kc
                     val kType = if (polymorphicClass != null) kClass.createType() else prop.returnType
                     val cls = polymorphicClass?.java ?: kc.java
-                    val convertedValue = klaxon.findConverterFromClass(cls, prop)
+                    val convertedValue = karna.findConverterFromClass(cls, prop)
                             .fromJson(JsonValue(jValue, prop.returnType.javaType,
-                                    kType, klaxon))
+                                    kType, karna))
                     result[prop.name] = convertedValue
                 } else if (prop.returnType.isMarkedNullable
                     && ((jsonAnnotation?.serializeNull == false) // Local settings have precedence to instance settings
-                    || (jsonAnnotation == null && !klaxon.instanceSettings.serializeNull))
+                    || (jsonAnnotation == null && !karna.instanceSettings.serializeNull))
                 ) {
                     // provide a default value of null, overriding Kotlin default
                     result[prop.name] = null
@@ -232,7 +232,7 @@ class JsonObjectConverter(private val klaxon: Karna, private val allPaths: HashM
         return if (polymorphicInfo != null) {
             // We have polymorphic information for this field. Retrieve its TypeAdapter,
             // instantiate it, and invoke it with the discriminant value.
-            val discriminantFieldName = Annotations.retrieveJsonFieldName(klaxon, kc, polymorphicInfo.discriminantField)
+            val discriminantFieldName = Annotations.retrieveJsonFieldName(karna, kc, polymorphicInfo.discriminantField)
             val discriminant = jsonObject[discriminantFieldName]
             polymorphicInfo.adapter.createInstance().classForNullable(discriminant)
         } else {

@@ -9,7 +9,7 @@ import java.math.BigInteger
 import kotlin.reflect.jvm.jvmErasure
 
 /**
- * The default Klaxon converter, which attempts to convert the given value as an enum first and if this fails,
+ * The default Karna converter, which attempts to convert the given value as an enum first and if this fails,
  * using reflection to enumerate the fields of the passed object and assign them values.
  */
 class DefaultConverter(private val karna: Karna, private val allPaths: HashMap<String, Any>) : Converter {

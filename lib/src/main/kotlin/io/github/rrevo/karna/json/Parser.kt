@@ -50,7 +50,7 @@ interface Parser {
             )
 
         /**
-         * Main entry for Klaxon's parser.
+         * Main entry for Karna's parser.
          *
          * If [streaming] is true, the parser doesn't expect to finish on an EOF token. This is used for streaming, when
          * the user requests to read a subset of the entire JSON document.

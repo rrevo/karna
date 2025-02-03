@@ -26,8 +26,8 @@ sealed class TupleValue {
 }
 
 //fun main(args: Array<String>) {
-//    val klaxon = Klaxon().converter(convertTuple)
-//    val result = klaxon.parse<TopLevel>("""[0, "zero"]""")
+//    val karna = Karna().converter(convertTuple)
+//    val result = karna.parse<TopLevel>("""[0, "zero"]""")
 //    println(result)
 //}
 

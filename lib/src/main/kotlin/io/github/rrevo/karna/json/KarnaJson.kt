@@ -8,7 +8,7 @@ import kotlin.collections.LinkedHashMap
  * The class used to define the DSL that generates JSON documents. All the functions defined in this class
  * can be used inside a `json { ... }` call.
  */
-class KlaxonJson {
+class KarnaJson {
     fun array(vararg args: Any?) : JsonArray<Any?> = JsonArray(args.map { convert(it) })
 
     fun array(args: List<Any?>) : JsonArray<Any?> = JsonArray(args.map { convert(it) })
@@ -22,9 +22,9 @@ class KlaxonJson {
     fun obj(vararg args: Pair<String, *>): JsonObject =
             obj(args.toList())
 
-    fun obj(key: String, init: KlaxonJson.() -> Unit): JsonObject {
+    fun obj(key: String, init: KarnaJson.() -> Unit): JsonObject {
         stackMap.push(LinkedHashMap<String, Any?>())
-        theKlaxonJson.init()
+        theKarnaJson.init()
         val map = stackMap.pop()
         val newMap = if (stackMap.isEmpty()) HashMap() else stackMap.peek()
         newMap[key] = JsonObject(map.mapValues { convert(it.value) })
@@ -39,7 +39,7 @@ class KlaxonJson {
 
     companion object {
 
-        internal val theKlaxonJson = KlaxonJson()
+        internal val theKarnaJson = KarnaJson()
 
         private fun convert(value: Any?): Any? = when (value) {
             is Float -> value.toDouble()
@@ -55,6 +55,6 @@ class KlaxonJson {
 /**
  * Main entry point.
  */
-fun <T> json(init : KlaxonJson.() -> T) : T {
-    return KlaxonJson.theKlaxonJson.init()
+fun <T> json(init : KarnaJson.() -> T) : T {
+    return KarnaJson.theKarnaJson.init()
 }
