@@ -21,6 +21,7 @@ repositories {
 
 dependencies {
     implementation(kotlin("reflect"))
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1")
 
     testImplementation(kotlin("test"))
     testImplementation("org.assertj:assertj-core:3.27.3")

@@ -39,12 +39,14 @@ interface Parser {
         operator fun invoke(
             pathMatchers: List<PathMatcher> = emptyList(),
             passedLexer: Lexer? = null,
-            streaming: Boolean = false
+            streaming: Boolean = false,
+            coroutineStreaming: Boolean = false
         ): Parser =
             KarnaParser(
                 pathMatchers,
                 passedLexer,
-                streaming
+                streaming,
+                coroutineStreaming
             )
 
         /**
@@ -56,11 +58,13 @@ interface Parser {
         fun default(
             pathMatchers: List<PathMatcher> = emptyList(),
             passedLexer: Lexer? = null,
-            streaming: Boolean = false
+            streaming: Boolean = false,
+            coroutineStreaming: Boolean = false
         ): Parser = KarnaParser(
             pathMatchers,
             passedLexer,
-            streaming
+            streaming,
+            coroutineStreaming
         )
     }
 }

@@ -9,7 +9,8 @@ import java.nio.charset.Charset
 internal class KarnaParser(
     private val pathMatchers: List<PathMatcher>,
     private val passedLexer: Lexer?,
-    private val streaming: Boolean
+    private val streaming: Boolean,
+    private val coroutineStreaming: Boolean
 ) : Parser {
     override fun parse(rawValue: StringBuilder): Any =
         StringReader(rawValue.toString()).use {
@@ -22,6 +23,7 @@ internal class KarnaParser(
 
     override fun parse(reader: Reader): Any {
         return if (streaming) partialParseLoop(stateMachine, (reader as JsonReader).reader)
+        else if (coroutineStreaming) partialParseLoop(stateMachine, (reader as JsonCoroutineReader).reader)
         else fullParseLoop(stateMachine, reader)
     }
 

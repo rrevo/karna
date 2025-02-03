@@ -91,12 +91,24 @@ class Karna(
         return maybeParse(p.parse(jsonReader) as JsonObject)
     }
 
+    @Suppress("unused")
+    inline fun <reified T> parse(jsonReader: JsonCoroutineReader): T? {
+        val p = parser(T::class, jsonReader.lexer, coroutineStreaming = true)
+        return maybeParse(p.parse(jsonReader) as JsonObject)
+    }
+
     /**
      * Parse a JsonReader into a List.
      */
     @Suppress("unused")
     inline fun <reified T> parseArray(jsonReader: JsonReader): List<T>? {
         val p = parser(T::class, jsonReader.lexer, streaming = true)
+        return parseFromJsonArray(p.parse(jsonReader) as JsonArray<*>)
+    }
+
+    @Suppress("unused")
+    inline fun <reified T> parseArray(jsonReader: JsonCoroutineReader): List<T>? {
+        val p = parser(T::class, jsonReader.lexer, coroutineStreaming = true)
         return parseFromJsonArray(p.parse(jsonReader) as JsonArray<*>)
     }
 
@@ -172,7 +184,8 @@ class Karna(
         override fun onMatch(path: String, value: Any) { allPaths[path] = value }
     }
 
-    fun parser(kc: KClass<*>? = null, passedLexer: Lexer? = null, streaming: Boolean = false): Parser {
+    fun parser(kc: KClass<*>? = null, passedLexer: Lexer? = null, streaming: Boolean = false,
+               coroutineStreaming: Boolean = false): Parser {
         val result = Annotations.findJsonPaths(kc)
         if (result.any()) {
             // If we found at least one @Json(path = ...), add the DefaultPathMatcher with a list
@@ -181,7 +194,7 @@ class Karna(
             pathMatchers.add(DefaultPathMatcher(result.toSet()))
         }
 
-        return Parser.default(pathMatchers, passedLexer, streaming)
+        return Parser.default(pathMatchers, passedLexer, streaming, coroutineStreaming)
     }
 
     private val DEFAULT_CONVERTER = DefaultConverter(this, allPaths)
