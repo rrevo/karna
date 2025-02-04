@@ -6,6 +6,9 @@
  * This project uses @Incubating APIs which are subject to change.
  */
 
+version = "0.1.0"
+group = "io.github.rrevo"
+
 plugins {
     // Apply the org.jetbrains.kotlin.jvm Plugin to add support for Kotlin.
     alias(libs.plugins.kotlin.jvm)
@@ -35,5 +38,14 @@ tasks.test {
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(17)
+    }
+    withSourcesJar()
+    withJavadocJar()
+}
+
+tasks.jar {
+    manifest {
+        attributes(mapOf("Implementation-Title" to project.name,
+            "Implementation-Version" to project.version))
     }
 }
