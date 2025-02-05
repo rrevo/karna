@@ -2,6 +2,7 @@ package io.github.rrevo.karna.json
 
 import io.github.rrevo.karna.json.token.*
 import java.io.Reader
+import java.util.*
 import java.util.regex.Pattern
 
 /**
@@ -193,9 +194,9 @@ class Lexer(passedReader: Reader, val lenient: Boolean = false): Iterator<Token>
                 }
             } else if (DOUBLE.matcher(v).matches()) {
                 token = Value(java.lang.Double.parseDouble(v))
-            } else if ("true" == v.toLowerCase()) {
+            } else if ("true" == v.lowercase(Locale.getDefault())) {
                 token = Value(true)
-            } else if ("false" == v.toLowerCase()) {
+            } else if ("false" == v.lowercase(Locale.getDefault())) {
                 token = Value(false)
             } else if (v == "null") {
                 token = Value(null)

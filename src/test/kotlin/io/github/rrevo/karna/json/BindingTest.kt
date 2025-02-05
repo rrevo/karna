@@ -4,6 +4,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.data.Percentage
 import org.testng.Assert
 import org.testng.annotations.Test
+import java.util.*
 
 data class Card(val value: Int, val suit: String)
 data class Deck1(val card: Card, val cardCount: Int)
@@ -44,7 +45,7 @@ class BindingTest {
         override fun toJson(v: Any) = (v as Card).let { value ->
             """
                     "value" : ${value.value},
-                    "suit": "${value.suit.toUpperCase()}"
+                    "suit": "${value.suit.uppercase(Locale.getDefault())}"
                 """
         }
     }
