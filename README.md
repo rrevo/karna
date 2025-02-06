@@ -82,6 +82,6 @@ mvn clean package dokka:javadocJar gpg:sign deploy
 - Deploy to Maven Central
 - Create a new tag in git. Push the tag.
 - Update version in `pom.xml` to next `-SNAPSHOT`. Local commit.
-- Push to main.
+- Push to remote main.
 - Create a new release in GitHub
 - Celebrate 🎉
