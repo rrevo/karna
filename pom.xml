@@ -7,17 +7,15 @@
 
     <groupId>io.github.rrevo</groupId>
     <artifactId>karna</artifactId>
-    <name>karna</name>
+    <version>0.4.0</version>
     <packaging>jar</packaging>
-
-    <version>0.2.0-SNAPSHOT</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <kotlin.version>2.1.10</kotlin.version>
+        <kotlin.version>1.9.25</kotlin.version>
         <assertj.version>3.27.3</assertj.version>
-        <coroutines.version>1.10.1</coroutines.version>
+        <coroutines.version>1.8.1</coroutines.version>
 
         <plugin.maven-source.version>2.2.1</plugin.maven-source.version>
         <plugin.dokka.version>2.0.0</plugin.dokka.version>
@@ -67,14 +65,12 @@
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-maven-plugin</artifactId>
                 <version>${kotlin.version}</version>
-                <extensions>true</extensions> <!-- You can set this option
-            to automatically take information about lifecycles -->
+                <extensions>true</extensions>
                 <executions>
                     <execution>
                         <id>compile</id>
                         <goals>
-                            <goal>compile</goal> <!-- You can skip the <goals> element
-                        if you enable extensions for the plugin -->
+                            <goal>compile</goal>
                         </goals>
                         <configuration>
                             <sourceDirs>
@@ -85,8 +81,7 @@
                     <execution>
                         <id>test-compile</id>
                         <goals>
-                            <goal>test-compile</goal> <!-- You can skip the <goals> element
-                    if you enable extensions for the plugin -->
+                            <goal>test-compile</goal>
                         </goals>
                         <configuration>
                             <sourceDirs>
@@ -139,6 +134,13 @@
                         <goals>
                             <goal>sign</goal>
                         </goals>
+                        <configuration>
+                            <!-- Prevent `gpg` from using pinentry programs -->
+                            <gpgArguments>
+                                <arg>--pinentry-mode</arg>
+                                <arg>loopback</arg>
+                            </gpgArguments>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -150,8 +152,32 @@
                 <extensions>true</extensions>
                 <configuration>
                     <publishingServerId>central</publishingServerId>
+                    <autoPublish>true</autoPublish>
                 </configuration>
             </plugin>
         </plugins>
     </build>
+
+    <name>karna</name>
+    <description>Karna is a JSON parsing library in Kotlin</description>
+    <url>>http://github.com/rrevo/karna</url>
+    <licenses>
+        <license>
+            <name>The Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>Rahul Revo</name>
+            <email>rahulrevo@gmail.com</email>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git://github.com/rrevo/karna.git</connection>
+        <developerConnection>scm:git:git://github.com/rrevo/karna.git</developerConnection>
+        <url>http://github.com/rrevo/karna/tree/main</url>
+    </scm>
 </project>
