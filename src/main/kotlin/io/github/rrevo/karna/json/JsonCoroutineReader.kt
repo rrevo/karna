@@ -14,6 +14,8 @@ class JsonCoroutineReader(val reader: Reader) : Reader() {
      */
     suspend fun nextString() = consumeValue<String>()
 
+    suspend fun nextStringOrNull() = consumeValueNullable<String>()
+
     /**
      * @return the next Int.
      * @throws JsonParsingException the next value is not an Int.
@@ -66,7 +68,7 @@ class JsonCoroutineReader(val reader: Reader) : Reader() {
     /**
      * @return the next object, making sure the current token is an open brace and the last token is a closing brace.
      */
-    suspend fun nextObject() : JsonObject {
+    suspend fun nextObject(): JsonObject {
         return beginObject {
             JsonObject().let { result ->
                 while (hasNext()) {
@@ -82,7 +84,7 @@ class JsonCoroutineReader(val reader: Reader) : Reader() {
     /**
      * @return the next array, making sure the current token is an open bracket and the last token is a closing bracket.
      */
-    suspend fun nextArray() : List<Any> {
+    suspend fun nextArray(): List<Any> {
         return beginArray {
             arrayListOf<Any>().let { result ->
                 while (hasNext()) {
@@ -110,7 +112,7 @@ class JsonCoroutineReader(val reader: Reader) : Reader() {
      * Make sure that the next token is the beginning of an object (open brace),
      * consume it, run the closure and then make sure the object is closed (closed brace).
      */
-    suspend fun <T> beginObject(closure: suspend () -> T) : T {
+    suspend fun <T> beginObject(closure: suspend () -> T): T {
         skip()
         privateBeginObject()
         val result = closure()
@@ -122,7 +124,7 @@ class JsonCoroutineReader(val reader: Reader) : Reader() {
      * Makes sure that the next token is the beginning of an array (open bracket),
      * consume it, run the closure and then make sure the array is closed (closed bracket).
      */
-    suspend fun <T> beginArray(closure: suspend () -> T) : T {
+    suspend fun <T> beginArray(closure: suspend () -> T): T {
         skip()
         privateBeginArray()
         val result = closure()
@@ -163,10 +165,15 @@ class JsonCoroutineReader(val reader: Reader) : Reader() {
         while (SKIPS.contains(lexer.peek())) lexer.nextToken()
     }
 
-    private suspend fun nextValue(): Any? {
+    private suspend fun nextValue(allowNull: Boolean = false): Any? {
         skip()
 
         val next = lexer.nextToken()
+        if (allowNull) {
+            if (next == Value(null)) {
+                return null
+            }
+        }
         if (next !is Value<*>) {
             throw KarnaException("Expected a value but got $next")
         }
@@ -182,6 +189,12 @@ class JsonCoroutineReader(val reader: Reader) : Reader() {
      */
     private suspend inline fun <reified T> consumeValue(): T {
         val value = nextValue()
+        return value as? T
+            ?: throw JsonParsingException("Next token is not a ${T::class.java.simpleName}: $value")
+    }
+
+    private suspend inline fun <reified T> consumeValueNullable(): T? {
+        val value = nextValue(allowNull = true) ?: return null
         return value as? T
             ?: throw JsonParsingException("Next token is not a ${T::class.java.simpleName}: $value")
     }

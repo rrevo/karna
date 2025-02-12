@@ -62,6 +62,7 @@ class StreamingCoroutineTest {
     }
 
     data class Person1(val name: String, val age: Int)
+
     val array = """[
             { "name": "Joe", "age": 23 },
             { "name": "Jill", "age": 35 }
@@ -89,7 +90,7 @@ class StreamingCoroutineTest {
             val karna = Karna()
             val MAX = 10_000_000
             val PRINT_FACTOR = 10_000
-            val lazyReader = object: Reader() {
+            val lazyReader = object : Reader() {
                 var started = false
                 var done = false
                 var count = 0
@@ -142,7 +143,7 @@ class StreamingCoroutineTest {
 //                        result.add(person!!)
                         counter++
                         if (counter % PRINT_FACTOR == 0) {
-                            println("Remaining ${(MAX - counter) / PRINT_FACTOR} of ${MAX/PRINT_FACTOR} objects (* $PRINT_FACTOR)")
+                            println("Remaining ${(MAX - counter) / PRINT_FACTOR} of ${MAX / PRINT_FACTOR} objects (* $PRINT_FACTOR)")
                         }
                     }
                 }
@@ -154,6 +155,7 @@ class StreamingCoroutineTest {
 
     data class Address(val street: String)
     data class Person2(val name: String, val address: Address)
+
     fun nestedObjects() {
         runBlocking {
             val objectString = """[
@@ -209,7 +211,66 @@ class StreamingCoroutineTest {
         }
     }
 
-    @DataProvider(name="invalid-strings")
+    fun testNextObject() {
+        runBlocking {
+            JsonCoroutineReader(
+                StringReader(
+                    """
+            { "key" : "text" }
+            """.trimIndent()
+                )
+            ).use { reader ->
+                val obj = reader.nextObject()
+                Assert.assertEquals(obj["key"], "text")
+            }
+        }
+    }
+
+    fun testNextObjectParsingString() {
+        var key: String? = null
+        var value: String? = null
+
+        runBlocking {
+            JsonCoroutineReader(
+                StringReader(
+                    """
+              { "key" : "text" }
+            """.trimIndent()
+                )
+            ).use { reader ->
+                reader.beginObject {
+                    key = reader.nextName()
+                    value = reader.nextString()
+                }
+            }
+        }
+        Assert.assertEquals(key, "key")
+        Assert.assertEquals(value, "text")
+    }
+
+    fun testNextObjectParsingStringWithNull() {
+        var key: String? = null
+        var value: String? = null
+
+        runBlocking {
+            JsonCoroutineReader(
+                StringReader(
+                    """
+              { "key" : null }
+            """.trimIndent()
+                )
+            ).use { reader ->
+                reader.beginObject {
+                    key = reader.nextName()
+                    value = reader.nextStringOrNull()
+                }
+            }
+        }
+        Assert.assertEquals(key, "key")
+        Assert.assertEquals(value, null)
+    }
+
+    @DataProvider(name = "invalid-strings")
     fun createinvalidStringData() = arrayOf(
         arrayOf("[null]"), // null
         arrayOf("[true]"), // Boolean
@@ -219,7 +280,7 @@ class StreamingCoroutineTest {
     )
 
     @Test(dataProvider = "invalid-strings")
-    fun testNextStringInvalidInput(nonStringValue : String) {
+    fun testNextStringInvalidInput(nonStringValue: String) {
         runBlocking {
             assertParsingExceptionFromArray(nonStringValue) { reader ->
                 reader.nextString()
@@ -237,7 +298,7 @@ class StreamingCoroutineTest {
         }
     }
 
-    @DataProvider(name="invalid-ints")
+    @DataProvider(name = "invalid-ints")
     fun createinvalidIntData() = arrayOf(
         arrayOf("[null]"), // null
         arrayOf("[true]"), // Boolean
@@ -247,7 +308,7 @@ class StreamingCoroutineTest {
     )
 
     @Test(dataProvider = "invalid-ints")
-    fun testNextIntInvalidInput(nonIntValue : String) {
+    fun testNextIntInvalidInput(nonIntValue: String) {
         runBlocking {
             assertParsingExceptionFromArray(nonIntValue) { reader ->
                 reader.nextInt()
@@ -271,7 +332,7 @@ class StreamingCoroutineTest {
         }
     }
 
-    @DataProvider(name="invalid-longs")
+    @DataProvider(name = "invalid-longs")
     fun createinvalidLongData() = arrayOf(
         arrayOf("[null]"), // null
         arrayOf("[true]"), // Boolean
@@ -280,7 +341,7 @@ class StreamingCoroutineTest {
     )
 
     @Test(dataProvider = "invalid-longs")
-    fun testNextLongInvalidInput(nonLongValue : String) {
+    fun testNextLongInvalidInput(nonLongValue: String) {
         runBlocking {
             assertParsingExceptionFromArray(nonLongValue) { reader ->
                 reader.nextLong()
@@ -310,7 +371,7 @@ class StreamingCoroutineTest {
         }
     }
 
-    @DataProvider(name="invalid-biginteger")
+    @DataProvider(name = "invalid-biginteger")
     fun createinvalidBigIntegerData() = arrayOf(
         arrayOf("[null]"), // null
         arrayOf("[true]"), // Boolean
@@ -319,7 +380,7 @@ class StreamingCoroutineTest {
     )
 
     @Test(dataProvider = "invalid-biginteger")
-    fun testNextBigIntegerInvalidInput(nonBigIntegerValue : String) {
+    fun testNextBigIntegerInvalidInput(nonBigIntegerValue: String) {
         runBlocking {
             assertParsingExceptionFromArray(nonBigIntegerValue) { reader ->
                 reader.nextBigInteger()
@@ -343,7 +404,7 @@ class StreamingCoroutineTest {
         }
     }
 
-    @DataProvider(name="invalid-doubles")
+    @DataProvider(name = "invalid-doubles")
     fun createinvalidDoubleData() = arrayOf(
         arrayOf("[null]"), // null
         arrayOf("[true]"), // Boolean
@@ -353,7 +414,7 @@ class StreamingCoroutineTest {
     )
 
     @Test(dataProvider = "invalid-doubles")
-    fun testNextDoubleInvalidInput(nonDoubleValue : String) {
+    fun testNextDoubleInvalidInput(nonDoubleValue: String) {
         runBlocking {
             assertParsingExceptionFromArray(nonDoubleValue) { reader ->
                 reader.nextDouble()
@@ -377,7 +438,7 @@ class StreamingCoroutineTest {
         }
     }
 
-    @DataProvider(name="invalid-booleans")
+    @DataProvider(name = "invalid-booleans")
     fun createinvalidBooleanData() = arrayOf(
         arrayOf("[null]"), // null
         arrayOf("[\"123\"]"), // String
@@ -389,7 +450,7 @@ class StreamingCoroutineTest {
     )
 
     @Test(dataProvider = "invalid-booleans")
-    fun testNextBooleanInvalidInput(nonBooleanValue : String) {
+    fun testNextBooleanInvalidInput(nonBooleanValue: String) {
         runBlocking {
             assertParsingExceptionFromArray(nonBooleanValue) { reader ->
                 reader.nextBoolean()
@@ -397,7 +458,10 @@ class StreamingCoroutineTest {
         }
     }
 
-    private suspend fun assertParsingExceptionFromArray(json: String, nextValue: suspend (JsonCoroutineReader) -> Unit) {
+    private suspend fun assertParsingExceptionFromArray(
+        json: String,
+        nextValue: suspend (JsonCoroutineReader) -> Unit
+    ) {
         JsonCoroutineReader(StringReader(json)).use { reader ->
             var exceptionCount = 0
             reader.beginArray {
