@@ -52,7 +52,7 @@ Maven dependency
 <dependency>
     <groupId>io.github.rrevo</groupId>
     <artifactId>karna</artifactId>
-    <version>0.4.0</version>
+    <version>0.5.0</version>
 </dependency>
 ```
 
@@ -77,7 +77,7 @@ mvn clean package dokka:javadocJar gpg:sign deploy
 
 - Local git
   - Update version in `pom.xml` to remove `-SNAPSHOT`.
-  - Update this file with install section.
+  - Update this file with the new version in the install section.
   - Commit.
 - Deploy to Maven Central
 - Create a new tag in git. Push the tag.
